@@ -9,9 +9,12 @@ import org.hibernate.annotations.SelectBeforeUpdate;
 import javax.persistence.*;
 import java.util.Date;
 
+/**
+ * Сущность Голосование
+ */
 // JPA
 @Entity // все поля класса будут автоматически связаны со столбцами таблицы
-@Table(catalog = "library")
+@Table(catalog = "library", name = "vote")
 // Lombok
 @EqualsAndHashCode(of = "id")
 @Data // генерация гетеров-сетеров для всех полей класса
@@ -21,8 +24,12 @@ import java.util.Date;
 @SelectBeforeUpdate // проверить объект перед обновлением, нужно ли его обновлять
 public class Vote {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // autoincrement
     @Id
+    // autoincrement for Oracle DB, PostgreSQL
+    @SequenceGenerator(name = "vote_generator", sequenceName = "vote_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "vote_generator")
+    // autoincrement for MS SQL, MySQL
+//    @GeneratedValue(strategy = GenerationType.IDENTITY) // for MS SQL, MySQL
     private Long id;
     private String value;
     @Column(name = "book_id")

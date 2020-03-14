@@ -8,9 +8,12 @@ import org.hibernate.annotations.SelectBeforeUpdate;
 
 import javax.persistence.*;
 
+/**
+ * Сущность Книга
+ */
 // JPA
 @Entity // все поля класса будут автоматически связаны со столбцами таблицы
-@Table(catalog = "library")
+@Table(catalog = "library", name = "book")
 // Lombok
 @EqualsAndHashCode(of = "id")
 @Data // генерация гетеров-сетеров для всех полей класса
@@ -24,7 +27,7 @@ public class Book {
     }
 
     // здесь нет заполнения поля content - чтобы не грузить страницу (контент получаем по требованию)
-    public Book(Long id, String name, Integer pageCount, String isbn, Genre genre, Author author, Publisher publisher, Integer publishYear, byte[] image, String descr, long viewCount, long totalRating, long totalVoteCount, int avgRating) {
+    public Book(Long id, String name, Integer pageCount, String isbn, Genre genre, Author author, Publisher publisher, Integer publishYear, byte[] image, String description, long viewCount, long totalRating, long totalVoteCount, long avgRating) {
         this.id = id;
         this.name = name;
         this.pageCount = pageCount;
@@ -34,7 +37,7 @@ public class Book {
         this.publisher = publisher;
         this.publishYear = publishYear;
         this.image = image;
-        this.descr = descr;
+        this.description = description;
         this.viewCount = viewCount;
         this.totalRating = totalRating;
         this.totalVoteCount = totalVoteCount;
@@ -47,11 +50,15 @@ public class Book {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // autoincrement
+    // autoincrement for Oracle DB, PostgreSQL
+    @SequenceGenerator(name = "author_generator", sequenceName = "author_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "author_generator")
+    // autoincrement for MS SQL, MySQL
+//    @GeneratedValue(strategy = GenerationType.IDENTITY) // for MS SQL, MySQL
     private Long id;
     private String name;
     private String isbn;
-    private String descr;
+    private String description;
     @Column(name = "page_count")
     private Integer pageCount;
     @Column(name = "publish_year")
@@ -63,20 +70,18 @@ public class Book {
     @Column(name = "total_vote_count")
     private long totalVoteCount;
     @Column(name = "avg_rating")
-    private int avgRating;
+    private long avgRating;
 
-    @ManyToOne // ссылка foreign key идет из таблицы Book в таблицу Genre
     // по-умолчанию Hibernate пытается связать по полю genre_id (как в нашей таблице), если имя столбца другое, нужно задавать атрибут name у @JoinColumn
     @JoinColumn // для получения готового объекта Genre по id
+    @ManyToOne(fetch = FetchType.LAZY) // ссылка foreign key идет из таблицы Book в таблицу Genre
     private Genre genre;
-    @ManyToOne
-    @JoinColumn
+    @ManyToOne(fetch = FetchType.LAZY)
     private Author author;
-    @ManyToOne
     @JoinColumn
+    @ManyToOne(fetch = FetchType.LAZY)
     private Publisher publisher;
 
-    @Lob
     @Column(updatable = false) // updatable = false: при апдейте это поле не будет добавляться
     // (content будем обновлять отдельным запросом)
     private byte[] content;

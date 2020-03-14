@@ -9,9 +9,12 @@ import org.hibernate.annotations.SelectBeforeUpdate;
 import javax.persistence.*;
 import java.util.List;
 
+/**
+ * Сущность Издательство
+ */
 // JPA
 @Entity // все поля класса будут автоматически связаны со столбцами таблицы
-@Table(catalog = "library")
+@Table(catalog = "library", name = "publisher")
 // Lombok
 @EqualsAndHashCode(of = "id")
 @Data // генерация гетеров-сетеров для всех полей класса
@@ -22,7 +25,11 @@ import java.util.List;
 public class Publisher {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // autoincrement
+    // autoincrement for Oracle DB, PostgreSQL
+    @SequenceGenerator(name = "publisher_generator", sequenceName = "publisher_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "publisher_generator")
+    // autoincrement for MS SQL, MySQL
+//    @GeneratedValue(strategy = GenerationType.IDENTITY) // for MS SQL, MySQL
     private Long id;
     private String name;
 
@@ -35,5 +42,4 @@ public class Publisher {
     public String toString() {
         return name;
     }
-
 }
